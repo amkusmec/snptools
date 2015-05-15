@@ -40,7 +40,7 @@ def version():
    v0 = """
    ############################################################################
    convert
-   (c) 2015 by Aaron Kusmec
+   (c) 2015 Aaron Kusmec
    
    Convert between different SNP file formats.
    Input/output modes,
@@ -350,10 +350,12 @@ if __name__ == '__main__':
     if args['path'] is not None:
         os.chdir(args['path'])
     if args['input'] is None:
-        warning("No input file!")
+        warning("No input file.")
     if args['output'] is None:
-        warning("No output file!")
-
+        warning("No output file.")
+    
+    print(version())
+    
     st = timeit.default_timer()
     
     # Load file

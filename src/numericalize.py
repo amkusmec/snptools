@@ -29,7 +29,7 @@ def version():
     v0 = """
     ###########################################################################
     numericalize
-    (c) 2015 by Aaron Kusmec
+    (c) 2015 Aaron Kusmec
     
     ---------------------------------------------------------------------------
     
@@ -177,8 +177,12 @@ if __name__ == "__main__":
     parser = getParser()
     args = vars(parser.parse_args())
     
+    if args['path'] is not None:
+        os.chdir(args['path'])
     if args['input'] is None or args['output'] is None:
         warning("Input/output file required.")
+    
+    print(version())
     
     st = timeit.default_timer()
     
