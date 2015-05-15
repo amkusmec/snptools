@@ -17,6 +17,7 @@ $ python convert.py -p ../example -i example.hmp.txt -o test.dsf -mi 2 -mo 1
 ```
 
 `convert` converts between different file formats. Be sure that you have specified the correct input and output modes. Specifying the wrong modes will generate undefined behavior. Modes:
+
 1. .dsf
 2. .hmp.txt
 3. .ped
