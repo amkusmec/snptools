@@ -1,0 +1,5 @@
+snpid	major	minor	miss	maf	I1	I2	I3	I4	I5
+1_10	A	G	0.2	0.375	N	A	G	R	A
+1_123	T	C	0.2	0.25	T	T	C	N	T
+1_246	C	G	0	0.4	C	C	C	G	G
+1_492	A	G	0	0.4	R	R	A	G	A

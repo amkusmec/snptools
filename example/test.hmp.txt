@@ -1,0 +1,5 @@
+rs#	alleles	chrom	pos	strand	assembly#	center	protLSID	assayLSID	panel	QCcode	I1	I2	I3	I4	I5
+1_10	N/N	1	10	NA	NA	NA	NA	NA	NA	NA	N	A	G	R	A
+1_123	N/N	1	123	NA	NA	NA	NA	NA	NA	NA	T	T	C	N	T
+1_246	N/N	1	246	NA	NA	NA	NA	NA	NA	NA	C	C	C	G	G
+1_492	N/N	1	492	NA	NA	NA	NA	NA	NA	NA	R	R	A	G	A
