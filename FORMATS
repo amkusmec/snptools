@@ -4,7 +4,8 @@ File format specifications supported by SNPTOOLS
 | 1. Density SNP Format (.dsf)
 ------------------------------------------------
 
-All SNPs are coded using single bit IUPAC nucleotide ambiguity codes (see section 4).
+All SNPs are coded using single bit IUPAC nucleotide ambiguity 
+codes (see section 4).
 Columns are as follows:
 	1. snpid - alphanumeric identifier; typically chr_pos
 	2. major - major (most common) allele
@@ -13,13 +14,15 @@ Columns are as follows:
 	5. maf - minor allele frequency
 	6+. SNP genotype calls for one sample
 
-Each ROW corresponds to a single SNP. Each COLUMN corresponds to a single sample.
+Each ROW corresponds to a single SNP. Each COLUMN corresponds to 
+a single sample.
 
 ------------------------------------------------
 | 2. HapMap Format (.hmp.txt)
 ------------------------------------------------
 
-All SNPs are coded using single bit IUPAC nucleotide ambiguity codes (see section 4).
+All SNPs are coded using single bit IUPAC nucleotide ambiguity 
+codes (see section 4).
 SNPTOOLS currently does not support double bit style coding.
 Columns are as follows:
 	1. rs# - alphanumeric identifier
@@ -35,19 +38,23 @@ Columns are as follows:
 	11. QCcode
 	12+. SNP genotype calls for one sample
 
-Each ROW corresponds to a single SNP. Each COLUMN corresponds to a single sample.
+Each ROW corresponds to a single SNP. Each COLUMN corresponds to 
+a single sample.
 
 ------------------------------------------------
 | 3. PLINK-style PED Format (.ped/.map)
 ------------------------------------------------
 
-These formats are compatible with Sean Purcell's PLINK software (pngu.mgh.harvard.edu/~purcell/plink/index.shtml).
+These formats are compatible with Sean Purcell's PLINK software 
+(pngu.mgh.harvard.edu/~purcell/plink/index.shtml).
 PLINK requires two files: .ped and .map.
 
 | 3.1. PED
 ----------
 
-All SNPs are coded using double bit IUPAC nucleotide codes. Note that software such as PLINK accepts any biallelic coding scheme and arbitrary missing genotypes. SNPTOOLS only operates on standard IUPAC codes.
+All SNPs are coded using double bit IUPAC nucleotide codes. Note 
+that software such as PLINK accepts any biallelic coding scheme and 
+arbitrary missing genotypes. SNPTOOLS only operates on standard IUPAC codes.
 Columns are as follows:
 	1. Family ID
 	2. Individual ID
@@ -59,12 +66,14 @@ Columns are as follows:
 Of the first six columns, SNPTOOLS only operates on the individual ID column.
 Columns 7+ are biallelic SNP genotypes.
 
-Each ROW contains the SNP genotypes for a single sample. Every two COLUMNS after column 6 contains the genotypes for a single SNP.
+Each ROW contains the SNP genotypes for a single sample. Every two 
+COLUMNS after column 6 contains the genotypes for a single SNP.
 
 | 3.2. MAP
 ----------
 
-Each row contains map information for a single SNP, presented in the same order in which they occur in the PED file.
+Each row contains map information for a single SNP, presented in the 
+same order in which they occur in the PED file.
 Columns are as follows:
 	1. Chromosome
 	2. rs# or SNP ID
