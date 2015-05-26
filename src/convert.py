@@ -57,7 +57,7 @@ def version():
    both file types will be replaced with appropriate missing values. If you 
    need allele information in .dsf or .hmp.txt files, run the `find_alleles` 
    utility on the output. If you need missing rates and minor allele 
-   frequencies in .dsf files, run the `` utility on the output.
+   frequencies in .dsf files, run the `snpstat` utility on the output.
    
    ############################################################################
    """

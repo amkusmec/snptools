@@ -30,6 +30,18 @@ iupac2 = { 'A': 'A A', 'C': 'C C', 'G': 'G G', 'T': 'T T',
            '-': '- -', '0': '+ -'
          }
 
+iupac3 = { 'A T': 'W', 'T A': 'W',
+           'C G': 'S', 'G C': 'S',
+           'A C': 'M', 'C A': 'M',
+           'G T': 'K', 'T G': 'K',
+           'A G': 'R', 'G A': 'R',
+           'C T': 'Y', 'T C': 'Y',
+           '+ -': '0', '- +': '0',
+           'A A': 'A', 'C C': 'C',
+           'G G': 'G', 'T T': 'T',
+           'N N': 'N'
+           }
+
 ###############################################################################
 def warning(*objs):
     print("WARNING: ", *objs, end='\n', file=sys.stderr)
@@ -42,19 +54,13 @@ def version():
    snpstat
    (c) 2015 Aaron Kusmec
    
-   Calculate missing rate, minor allele frequencie, and HWE.
+   Calculate missing rates and minor allele frequencies.
    Input modes,
        1 = .dsf
        2 = .hmp.txt
        3 = .ped (PLINK)
        
    Usage: python3 snpstat.py -i example.dsf -o example.stat -mi 1
-   
-   ----------------------------------------------------------------------------
-   
-   Todo:
-       - hmp and ped support
-       - HWE calculations
        
    ############################################################################
    """
@@ -120,10 +126,6 @@ def dsfStat(filename):
         header = infile.readline()
         
         for line in infile:
-            counter += 1
-            if counter % 1e5 == 0:
-                print("Processed [ ", str(counter), " ] SNPs.")
-            
             line = line.split()
             substat = [line[0], line[0].split('_')[0], line[0].split('_')[1]]
             miss = line[5:].count("N")/len(line[5:])
@@ -147,6 +149,100 @@ def dsfStat(filename):
                 substat.extend([allele2, allele1, str(miss), str(maf)])
             
             stats.append(substat)
+            
+            counter += 1
+            if counter % 1e5 == 0:
+                print("Processed [ ", str(counter), " ] SNPs.")
+    
+    return stats
+
+###############################################################################
+def hmpStat(filename):
+    print("Calculating statistics.")
+    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf"]]
+    counter = 0
+    
+    with open(filename, 'r') as infile:
+        # Skip the header line
+        header = infile.readline()
+        
+        for line in infile:
+            line = line.split()
+            substat = [line[0], line[2], line[3]]
+            miss = line[11:].count("N")/len(line[11:])
+            
+            # Get the alleles and maf
+            geno = set(line[11:])
+            geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
+            geno = list(geno)
+            allele1 = geno[0]
+            allele2 = geno[1]
+            het = iupac[allele1 + allele2]
+            
+            count1 = 2*line[11:].count(allele1) + line[11:].count(het)
+            count2 = 2*line[11:].count(allele2) + line[11:].count(het)
+            
+            if count1 >= count2:
+                maf = count2/(count1 + count2)
+                substat.extend([allele1, allele2, str(miss), str(maf)])
+            else:
+                maf = count1/(count1 + count2)
+                substat.extend([allele2, allele1, str(miss), str(maf)])
+            
+            stats.append(substat)
+            
+            counter += 1
+            if counter % 1e5 == 0:
+                print("Processed [ ", str(counter), " ] SNPs.")
+    
+    return stats
+
+###############################################################################
+def pedStat(filename):
+    print("Reading [ ", filename.split('.')[0] + ".map", " ].")
+    smap = []
+    with open(filename.split('.')[0] + ".map", 'r') as infile:
+        for line in infile:
+            smap.append(line.split())
+    
+    print("Reading [ ", filename, " ].")
+    snps = []
+    with open(filename, 'r') as infile:
+        for line in infile:
+            line = line.strip().split('\t')[6:]
+            snps.append([iupac3[l] for l in line])
+    snps = zip(*snps)
+      
+    print("Calculating statistics.")
+    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf"]]
+    counter = 0      
+    for s, m in zip(snps, smap):
+        substat = [m[1], m[0], m[3]]
+        miss = s.count("N")/len(s)
+        
+        # Get the alleles and maf
+        geno = set(s)
+        geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
+        geno = list(geno)
+        allele1 = geno[0]
+        allele2 = geno[1]
+        het = iupac[allele1 + allele2]
+        
+        count1 = 2*s.count(allele1) + s.count(het)
+        count2 = 2*s.count(allele2) + s.count(het)
+        
+        if count1 >= count2:
+            maf = count2/(count1 + count2)
+            substat.extend([allele1, allele2, str(miss), str(maf)])
+        else:
+            maf = count1/(count1 + count2)
+            substat.extend([allele2, allele1, str(miss), str(maf)])
+        
+        stats.append(substat)
+        
+        counter += 1
+        if counter % 1e5 == 0:
+            print("Processed [ ", str(counter), " ] SNPs.")
     
     return stats
 
@@ -172,6 +268,10 @@ if __name__ == '__main__':
     
     if args['modei'] == 1:
         stats = dsfStat(args['input'])
+    elif args['modei'] == 2:
+        stats = hmpStat(args['input'])
+    elif args['modei'] == 3:
+        stats = pedStat(args['input'])
     else:
         warning("Unrecognized input mode.")
         

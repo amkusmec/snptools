@@ -1,0 +1,5 @@
+snpid	chr	pos	major	minor	miss	maf
+1_10	1	10	A	G	0.2	0.375
+1_123	1	123	T	C	0.2	0.25
+1_246	1	246	C	G	0.0	0.4
+1_492	1	492	A	G	0.0	0.4

@@ -1,4 +1,3 @@
-- File format specifications
 - Tools:
-	- Calculate major/minor alleles and missing rates
 	- Filter SNPs based on minor allele frequency and/or missing rates
+- Testing on 5022x250k files on the server for all conversions/functions

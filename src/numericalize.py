@@ -149,11 +149,11 @@ def numericalize(snps):
         x = '\t'.join(s[1:])
         
         if count1 >= count2:
-            maf = count2/(len(s[1:])*2)
+            maf = count2/(count1 + count2)
             x = x.replace(allele1, '0')
             x = x.replace(allele2, '2')
         else:
-            maf = count1/(len(s[1:])*2)
+            maf = count1/(count1 + count2)
             x = x.replace(allele1, '2')
             x = x.replace(allele2, '0')
         
