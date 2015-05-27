@@ -107,19 +107,23 @@ def filterDsf(inname, outname, stats, miss, maf):
     keepfile.write('\t'.join(header) + '\n')
     filtfile.write('\t'.join(header) + '\n')
     
-    kept = filt = 0
+    kept = filt = counter = 0
     for snp in infile:
         snp = snp.split()
         if snp[0] not in stats:
             warning(snp[0] + " is not present in .stat file.")
 
         # Filter or keep
-        if float(snp[3]) <= miss and float(snp[4]) >= maf:
+        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
             keepfile.write('\t'.join(snp) + '\n')
             kept += 1
         else:
             filtfile.write('\t'.join(snp) + '\n')
             filt += 1
+        
+        counter += 1
+        if counter % 1e5 == 0:
+            print("Processed [ ", str(counter), " ] SNPs.")
 
     infile.close()
     keepfile.close()
@@ -127,6 +131,112 @@ def filterDsf(inname, outname, stats, miss, maf):
 
     print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".dsf", " ].")
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.dsf", " ].")
+
+###############################################################################
+def filterHmp(inname, outname, stats, miss, maf):
+    print("Filtering [ ", inname, " ].")
+
+    infile = open(inname, 'r')
+    keepfile = open(outname + ".hmp.txt", 'w')
+    filtfile = open(outname + "_filtered.hmp.txt", 'w')
+
+    header = infile.readline().split()
+    keepfile.write('\t'.join(header) + '\n')
+    filtfile.write('\t'.join(header) + '\n')
+
+    kept = filt = counter = 0
+    for snp in infile:
+        snp = snp.split()
+        if snp[0] not in stats:
+            warning(snp[0] + " is not present in .stat file.")
+
+        # Filter or keep
+        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
+            keepfile.write('\t'.join(snp) + '\n')
+            kept += 1
+        else:
+            filtfile.write('\t'.join(snp) + '\n')
+            filt += 1
+        
+        counter += 1
+        if counter % 1e5 == 0:
+            print("Processed [ ", str(counter), " ] SNPs.")
+
+    infile.close()
+    keepfile.close()
+    filtfile.close()
+
+    print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".hmp.txt", " ].")
+    print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.hmp.txt", " ].")
+
+###############################################################################
+def filterPed(inname, outname, stats, miss, maf):
+    # Read the .map file and verify that it contains the same SNPs
+    #  as the .stat file.
+    mapname = inname.split('.')[0] + ".map"
+    print("Verifying [ ", mapname, " ].")
+    smap = []
+    with open(mapname, 'r') as mapfile:
+        for line in mapfile:
+            line = line.split()
+            if line[1] in stats:
+                smap.append(line)
+            else:
+                warning(line[1] + " is not present in .stat file.")
+
+    # Read the entire .ped file into memory and transpose
+    snps = []
+    print("Reading [ ", inname, " ].")
+    with open(inname, 'r') as infile:
+        for line in infile:
+            snps.append(line.strip().split('\t'))
+    snps = zip(*snps)
+
+    # Setup the output lists and process the metadata
+    ksnps = []; kmap = []
+    fsnps = []; fmap = []
+
+    for _ in range(6):
+        m = next(snps)
+        ksnps.append(m)
+        fsnps.append(m)
+
+    # Filter or keep
+    kept = filt = counter = 0
+    for index, value in enumerate(snps):
+        if stats[smap[index][1]][0] <= miss and stats[smap[index][1]][1] >= maf:
+            ksnps.append(value)
+            kmap.append(smap[index])
+            kept += 1
+        else:
+            fsnps.append(value)
+            fmap.append(smap[index])
+            filt += 1
+
+        counter += 1
+        if counter % 1e5 == 0:
+            print("Processed [ ", str(counter), " ] SNPs.")
+
+    # Report the results and write the output
+    print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".ped", " ].")
+    ksnps = zip(*ksnps)
+    with open(outname + ".ped", 'w') as outfile:
+        for k in ksnps:
+            outfile.write('\t'.join(k) + '\n')
+
+    with open(outname + ".map", 'w') as outfile:
+        for k in kmap:
+            outfile.write('\t'.join(k) + '\n')
+
+    print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.ped", " ].")
+    fsnps = zip(*fsnps)
+    with open(outname + "_filtered.ped", 'w') as outfile:
+        for f in fsnps:
+            outfile.write('\t'.join(f) + '\n')
+
+    with open(outname + "_filtered.map", 'w') as outfile:
+        for f in fmap:
+            outfile.write('\t'.join(f) + '\n')
 
 ###############################################################################
 if __name__ == '__main__':
@@ -152,6 +262,10 @@ if __name__ == '__main__':
 
     if args['mode'] == 1:
         filterDsf(args['input'], args['output'], stats, args['miss'], args['maf'])
+    elif args['mode'] == 2:
+        filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'])
+    elif args['mode'] == 3:
+        filterPed(args['input'], args['output'], stats, args['miss'], args['maf'])
     else:
         warning("Unrecognized input mode.")
     

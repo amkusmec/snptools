@@ -10,17 +10,21 @@ Explanations of all options for each tool can be obtained using
 $ python tool_name.py --help
 ```
 
+For tools requiring input/output modes, the following modes are recognized:
+
+1. .dsf
+2. .hmp.txt
+3. .ped
+
+Use of an undefined mode will generate an error.
+
 ### `convert.py`
 
 ```
 $ python convert.py -p ../example -i example.hmp.txt -o test.dsf -mi 2 -mo 1
 ```
 
-`convert` converts between different file formats. Be sure that you have specified the correct input and output modes. Specifying the wrong modes will generate undefined behavior. Modes:
-
-1. .dsf
-2. .hmp.txt
-3. .ped
+`convert` converts between different file formats. Be sure that you have specified the correct input and output modes. Specifying the wrong modes will generate undefined behavior.
 
 ### `numericalize.py`
 
@@ -29,3 +33,12 @@ $ python numericalize.py -p ../example -i example.hmp.txt -o test.xmat
 ```
 
 `numericalize` converts a file to numeric genotypes, counting minor alleles. The tool also numerically imputes missing genotypes using two times the minor allele frequency (expected value of a binomial random variable).
+
+### `snpstat.py`
+
+```
+$ python snpstat.py -p ../example -i example.dsf -o example.stat -mi 1
+```
+
+`snpstat` calculates missing rates and minor allele frequencies for a SNP file. This information is required by `filter`.
+
