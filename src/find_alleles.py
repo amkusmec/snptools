@@ -138,6 +138,8 @@ def majorMinor(snp):
             return alleles[0], alleles[1]
         else:
             return alleles[1], alleles[0]
+    else:
+        return 'N', 'N'
 
 ###############################################################################
 if __name__ == '__main__':
