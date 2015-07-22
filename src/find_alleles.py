@@ -98,7 +98,7 @@ def findAllelesDsf(inname, outname):
             outfile.write(header)
 
             for line in infile:
-                line = line.split('\t')
+                line = line.strip().split('\t')
                 major, minor = majorMinor(line[5:])
                 line[1], line[2] = major, minor
                 outfile.write('\t'.join(line) + '\n')
@@ -111,14 +111,14 @@ def findAllelesHmp(inname, outname):
             outfile.write(header)
 
             for line in infile:
-                line = line.split('\t')
+                line = line.strip().split('\t')
                 major, minor = majorMinor(line[11:])
                 line[1] = major + '/' + minor
                 outfile.write('\t'.join(line) + '\n')
 
 ###############################################################################
 def majorMinor(snp):
-    set0 = set(snps)
+    set0 = set(snp)
     alleles = list(set0)
 
     for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
@@ -131,8 +131,8 @@ def majorMinor(snp):
 
     if len(alleles) == 2:
         het = iupac[''.join(alleles)]
-        allele1 = 2*snps.count(alleles[0]) + snps.count(het)
-        allele2 = 2*snps.count(alleles[1]) + snps.count(het)
+        allele1 = 2*snp.count(alleles[0]) + snp.count(het)
+        allele2 = 2*snp.count(alleles[1]) + snp.count(het)
 
         if allele1 >= allele2:
             return alleles[0], alleles[1]
@@ -158,7 +158,6 @@ if __name__ == '__main__':
     
     # Load file
     checkFile(args['input'], args['modei'])
-    snps = readFile(args['input'], args['modei'])
     
     # Convert
     if args['modei'] == 1:
@@ -172,11 +171,3 @@ if __name__ == '__main__':
 
     print("Conversion finished.")
     print("Time: %.2f min." % ((et - st)/60))
-
-
-
-
-
-
-
-
