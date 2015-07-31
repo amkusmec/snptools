@@ -32,18 +32,16 @@ def warning(*objs):
 def version():
    v0 = """
    ############################################################################
-   merge
+   sort
    (c) 2015 Aaron Kusmec
    
-   implements a union join on taxa and snps - includes every unique taxa-snp
-   combination; every combination not in a file is filled in by a missing value
+   Sorts the input file by chromosome and base-pair position.
    
    Limitations:
     - Only works for .dsf files
-    - Both input files must be the same format
     - Output only in the input format
    
-   Usage: python3 merge.py
+   Usage: python3 sort.py
    
    ############################################################################
    """
@@ -58,8 +56,7 @@ def get_parser():
 
     parser.add_argument('-p', '--path', help = 'Path of the input file', \
                         nargs = '?', default = os.getcwd())
-    parser.add_argument('-i1', '--input1', help = 'Input file 1', type = str)
-    parser.add_argument('-i2', '--input2', help = 'Input file 2', type = str)
+    parser.add_argument('-i', '--input', help = 'Input file', type = str)
     parser.add_argument('-o', '--output', help = 'Output file', type = str)
     parser.add_argument('-mi', '--modei', help = 'Input mode', type = int)
 
@@ -102,28 +99,7 @@ def writeFile(snps, filename):
             outfile.write('\t'.join(s) + '\n')
 
 ###############################################################################
-def mergeDsf(snps1, snps2):
-    mergedHeader = ['snpid', 'major', 'minor', 'miss', 'maf']
-    file1Header = snps1[0]
-    file2Header = snps2[0]
-    
-    # Unfortunately two expensive operations.
-    # No better ideas on how to do this right now
-    snps1 = list(map(list, zip(*snps1)))
-    snps2 = list(map(list, zip(*snps2)))
-
-    # Create a list of all unique SNP IDs
-    snpset = set(snps1[0][1:], snps2[0][1:])
-    
-    merged = []
-    for line in file1Header[5:]:
-        pass
-    
-    merged = list(map(list, zip(mergedHeader, *merged)))
-    return merged
-
-###############################################################################
-def mergeSNP(snp1, snp2):
+def sortDsf(snps):
     pass
 
 ###############################################################################
@@ -134,7 +110,7 @@ if __name__ == '__main__':
     # Change the working directory if necessary
     if args['path'] is not None:
         os.chdir(args['path'])
-    if args['input1'] is None or args['input2'] is None:
+    if args['input'] is None:
         warning("Missing input file(s).")
     if args['output'] is None:
         warning("No output file.")
@@ -144,23 +120,21 @@ if __name__ == '__main__':
     st = timeit.default_timer()
     
     # Load files
-    checkFile(args['input1'], args['modei'])
-    checkFile(args['input2'], args['modei'])
-    snps1 = readFile(args['input1'], args['modei'])
-    snps2 = readFile(args['input2'], args['modei'])
+    checkFile(args['input'], args['modei'])
+    snps = readFile(args['input'], args['modei'])
     
     # Merge
     if args['modei'] == 1:
-        merged = mergeDsf(snps1, snps2)
+        sorted = sortDsf(snps)
     else:
         warning("Unrecognized input/output mode(s).")
         
     # Write output
-    writeFile(merged, args['output'])
+    writeFile(sorted, args['output'])
     
     et = timeit.default_timer()
 
-    print("Merge finished.")
+    print("Sort finished.")
     print("Time: %.2f min." % ((et - st)/60))
     
 
