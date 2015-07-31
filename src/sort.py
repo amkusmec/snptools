@@ -3,6 +3,7 @@ import argparse
 import textwrap
 import timeit
 import os
+from operator import itemgetter
 
 # Define a dictionary converting IUPAC multi-base codes
 iupac = { 'A T': 'W', 'T A': 'W',
@@ -100,7 +101,47 @@ def writeFile(snps, filename):
 
 ###############################################################################
 def sortDsf(snps):
-    pass
+    # Remove the header line
+    header = snps[0]
+    snps = snps[1:]
+
+    # Create the key and place at the end of each line
+    for i in range(len(snps)):
+        key = [int(snps[i][0].split('_')[0]), int(snps[i][0].split('_')[1])]
+        snps[i].extend(key)
+
+    # Use Python's built-in list sort to sort the SNPs in place
+    snps.sort(key = itemgetter(-2, -1))
+
+    # Remove the key
+    for i in range(len(snps)):
+        snps[i] = snps[i][:-2]
+
+    snps.insert(0, header)
+    return snps
+
+###############################################################################
+def sortHmp(snps):
+    # Remove the header line
+    header = snps[0]
+    snps = snps[1:]
+
+    # Split chromosome and position numbers already exist
+    # We just need to convert them to integers
+    for i in range(len(snps)):
+        snps[i][2] = int(snps[i][2])
+        snps[i][3] = int(snps[i][3])
+
+    # Use Python's built-in list sort to sort the SNPs in place
+    snps.sort(key = itemgetter(2, 3))
+
+    # Convert back to strings
+    for i in range(len(snps)):
+        snps[i][2] = str(snps[i][2])
+        snps[i][3] = str(snps[i][3])
+
+    snps.insert(0, header)
+    return snps
 
 ###############################################################################
 if __name__ == '__main__':
@@ -126,6 +167,8 @@ if __name__ == '__main__':
     # Merge
     if args['modei'] == 1:
         sorted = sortDsf(snps)
+    if args['modei'] == 2:
+        sorted = sortHmp(snps)
     else:
         warning("Unrecognized input/output mode(s).")
         
