@@ -57,22 +57,23 @@ def getParser():
     parser.add_argument('-p', '--path', help = 'Path of the input files', \
                         nargs='?', default=os.getcwd())
     parser.add_argument('-i', '--input', help = 'Input file', type = str)
-    parser.add_argument('-o', '--output', help = 'Output file', type = str)
+    parser.add_argument('-o', '--output', help = 'Output file stem', type = str)
+    parser.add_argument('-mi', '--modei', help = 'Input mode', type  = int)
     
     return parser
 
 ###############################################################################
-def checkFile(filename):
+def checkFile(filename, modei):
     with open(filename, 'r') as infile:
         line = infile.readline().split()
     
-    if "dsf" in filename.split('.')[1]:
+    if modei == 1:
         if line[0] != "snpid" or line[1] != "major" or line[2] != "minor":
             warning(".dsf formatted incorrectly.")
-    elif "hmp" in filename.split('.')[1]:
+    elif modei == 2:
         if line[0] != "rs" and line[0] != "rs#":
             warning(".hmp.txt formatted incorrectly.")
-    elif "ped" in filename.split('.')[1]:
+    elif modei == 3:
         if len(line) <= 6:
             warning(".ped missing genotypes.")
             
@@ -85,26 +86,25 @@ def checkFile(filename):
         warning("Unrecognized file format.")
     
 ###############################################################################
-def readFile(filename):
+def readFile(filename, modei):
     snps = []
-    ext = filename.split('.')[1]
     
     with open(filename, 'r') as infile:
-        if "dsf" in ext:
+        if modei == 1:
             snps.append(["taxa"] + infile.readline().split()[5:])
             
             for line in infile:
                 line = line.split()
                 snps.append([line[0]] + line[5:])
             
-        elif "hmp" in ext:
+        elif modei == 2:
             snps.append(["taxa"] + infile.readline().split()[11:])
             
             for line in infile:
                 line = line.split()
                 snps.append([line[0]] + line[11:])
             
-        elif "ped" in ext:
+        elif modei == 3:
             for line in infile:
                 line = line.split()
                 
@@ -169,9 +169,17 @@ def writeFile(num, filename):
     print("Transposing SNP matrix.")
     num = zip(*num)
     
-    with open(filename, 'w') as outfile:
+    map_written = False
+    with open(filename + '.xmat', 'w') as outfile:
         for n in num:
-            outfile.write('\t'.join(n) + '\n')
+            if map_written:
+                outfile.write('\t'.join(n) + '\n')
+            else:
+                outfile.write('\t'.join(n) + '\n')
+                with open(filename + '.map', 'w') as mapfile:
+                    for n2 in n[1:]:
+                        mapfile.write('\t'.join([n2.split('_')[0], n2, '0', n2.split('_')[1]]) + '\n')
+                map_written = True
 
 if __name__ == "__main__":
     parser = getParser()
@@ -186,9 +194,9 @@ if __name__ == "__main__":
     
     st = timeit.default_timer()
     
-    checkFile(args['input'])
+    checkFile(args['input'], args['modei'])
     print("Reading from [ ", args['input'], " ].")
-    snps = readFile(args['input'])
+    snps = readFile(args['input'], args['modei'])
     
     num = numericalize(snps)
     
