@@ -59,6 +59,8 @@ def getParser():
     parser.add_argument('-i', '--input', help = 'Input file', type = str)
     parser.add_argument('-o', '--output', help = 'Output file stem', type = str)
     parser.add_argument('-mi', '--modei', help = 'Input mode', type  = int)
+    parser.add_argument('-c', '--coding', help = '1-based if True, 0-based if False', \
+                        action = "store_true")
     
     return parser
 
@@ -127,10 +129,19 @@ def readFile(filename, modei):
     return snps
 
 ###############################################################################
-def numericalize(snps):
+def numericalize(snps, coding):
     counter = 0
     num = [snps[0]]
     
+    if coding:
+        major = '0'
+        minor = '2'
+        hetero = 0
+    else:
+        major = '-1'
+        minor = '1'
+        hetero = -1
+
     for s in snps[1:]:
         counter += 1
         if counter % 1e5 == 0:
@@ -150,15 +161,15 @@ def numericalize(snps):
         
         if count1 >= count2:
             maf = count2/(count1 + count2)
-            x = x.replace(allele1, '0')
-            x = x.replace(allele2, '2')
+            x = x.replace(allele1, major)
+            x = x.replace(allele2, minor)
         else:
             maf = count1/(count1 + count2)
-            x = x.replace(allele1, '2')
-            x = x.replace(allele2, '0')
+            x = x.replace(allele1, minor)
+            x = x.replace(allele2, major)
         
-        x = x.replace(het, '1')
-        x = x.replace('N', str(2*maf))
+        x = x.replace(het, str(hetero + 1))
+        x = x.replace('N', str(hetero + 2*maf))
         
         num.append([s[0]] + x.split('\t'))
     
@@ -198,7 +209,7 @@ if __name__ == "__main__":
     print("Reading from [ ", args['input'], " ].")
     snps = readFile(args['input'], args['modei'])
     
-    num = numericalize(snps)
+    num = numericalize(snps, args['coding'])
     
     writeFile(num, args['output'])    
     
