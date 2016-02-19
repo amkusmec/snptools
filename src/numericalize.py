@@ -153,7 +153,10 @@ def numericalizeA(snps, coding):
         geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
         geno = list(geno)
         allele1 = geno[0]
-        allele2 = geno[1]
+        if len(geno) == 2:
+            allele2 = geno[1]
+        else:
+            allele2 = 'N'
         het = iupac[allele1 + allele2]
         
         count1 = 2*s[1:].count(allele1) + s[1:].count(het)
@@ -191,7 +194,10 @@ def numericalizeD(snps):
         geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
         geno = list(geno)
         allele1 = geno[0]
-        allele2 = geno[1]
+        if len(geno) == 2:
+            allele2 = geno[1]
+        else:
+            allele2 = 'N'
         het = iupac[allele1 + allele2]
         
         x = '\t'.join(s[1:])
