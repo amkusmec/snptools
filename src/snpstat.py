@@ -243,6 +243,8 @@ def hmpStat(filename):
                 maf = 0.0
                 substat.extend([allele1, allele2, str(miss), str(maf)])
             
+            stats.append(substat)
+            
             counter += 1
             if counter % 1e5 == 0:
                 print("Processed [ ", str(counter), " ] SNPs.")
