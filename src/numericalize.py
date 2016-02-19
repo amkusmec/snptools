@@ -60,7 +60,7 @@ def getParser():
     parser.add_argument('-o', '--output', help = 'Output file stem', type = str)
     parser.add_argument('-mi', '--modei', help = 'Input mode', type  = int)
     parser.add_argument('-c', '--coding', help = '1-based if True, 0-based if False', \
-                        action = "store_false")
+                        action = "store_true")
     
     return parser
 
