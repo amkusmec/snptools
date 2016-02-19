@@ -60,7 +60,9 @@ def getParser():
     parser.add_argument('-o', '--output', help = 'Output file stem', type = str)
     parser.add_argument('-mi', '--modei', help = 'Input mode', type  = int)
     parser.add_argument('-c', '--coding', help = '1-based if True, 0-based if False', \
-                        action = "store_true")
+                        action = "store_true", default = False)
+    parser.add_argument('-a', '--additive', help = 'Additive coding if True, dominance coding if False', \
+                        action = "store_true", default = False)
     
     return parser
 
@@ -129,7 +131,7 @@ def readFile(filename, modei):
     return snps
 
 ###############################################################################
-def numericalize(snps, coding):
+def numericalizeA(snps, coding):
     counter = 0
     num = [snps[0]]
     
@@ -176,6 +178,33 @@ def numericalize(snps, coding):
     return num
 
 ###############################################################################
+def numericalizeD(snps):
+    counter = 0
+    num = [snps[0]]
+    
+    for s in snps[1:]:
+        counter += 1
+        if counter % 1e5 == 0:
+            print("Processed ", str(counter), " of ", str(len(snps) - 1), " markers.")
+        
+        geno = set(s[1:])
+        geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
+        geno = list(geno)
+        allele1 = geno[0]
+        allele2 = geno[1]
+        het = iupac[allele1 + allele2]
+        
+        x = '\t'.join(s[1:])
+        x = x.replace(allele1, '0')
+        x = x.replace(het, '1')
+        x = x.replace(allele2, '0')
+        x = x.replace('N', '0') # Assume that missing genotypes are not heterozygous
+        
+        num.append([s[0]] + x.split('\t'))
+        
+    return num
+
+###############################################################################
 def writeFile(num, filename):
     print("Transposing SNP matrix.")
     num = zip(*num)
@@ -209,7 +238,10 @@ if __name__ == "__main__":
     print("Reading from [ ", args['input'], " ].")
     snps = readFile(args['input'], args['modei'])
     
-    num = numericalize(snps, args['coding'])
+    if args['additive']:
+        num = numericalizeA(snps, args['coding'])
+    elif not args['additive']:
+        num = numericalizeD(snps)
     
     writeFile(num, args['output'])    
     
