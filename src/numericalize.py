@@ -24,6 +24,9 @@ iupac = { 'AT': 'W', 'TA': 'W',
           'NN': 'N'
           }
 
+iupac2 = { 'W': 'A T', 'S': 'C G', 'M': 'A C', 'K': 'G T',
+           'R': 'A G', 'Y': 'C T', '0': '+ -' }
+
 ###############################################################################
 def version():
     v0 = """
@@ -149,7 +152,11 @@ def numericalizeA(snps, coding):
         if counter % 1e5 == 0:
             print("Processed ", str(counter), " of ", str(len(snps) - 1), " markers.")
         
-        geno = set(s[1:])
+        geno = list(set(s[1:]))
+        for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
+            if k in geno:
+                geno += iupac2[k].split()
+        geno = set(geno)
         geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
         geno = list(geno)
         allele1 = geno[0]
@@ -190,7 +197,11 @@ def numericalizeD(snps):
         if counter % 1e5 == 0:
             print("Processed ", str(counter), " of ", str(len(snps) - 1), " markers.")
         
-        geno = set(s[1:])
+        geno = list(set(s[1:]))
+        for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
+            if k in geno:
+                geno += iupac2[k].split()
+        geno = set(geno)
         geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
         geno = list(geno)
         allele1 = geno[0]
