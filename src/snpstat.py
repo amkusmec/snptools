@@ -118,7 +118,7 @@ def writeStats(stats, filename):
 ###############################################################################
 def dsfStat(filename):
     print("Calculating statistics.")
-    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf"]]
+    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf", "het"]]
     counter = 0
     
     with open(filename, 'r') as infile:
@@ -162,18 +162,19 @@ def dsfStat(filename):
             # Calculate the maf
             count1 = 2*line[5:].count(allele1) + line[5:].count(het)
             count2 = 2*line[5:].count(allele2) + line[5:].count(het)
+            hetero = line[5:].count(het)/(len(line[5:]) - line[5:].count("N"))
             
             if count1 >= count2 and count1 != 0:
                 maf = count2/(count1 + count2)
-                substat.extend([allele1, allele2, str(miss), str(maf)])
+                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
             elif count2 > count1:
                 maf = count1/(count1 + count2)
-                substat.extend([allele2, allele1, str(miss), str(maf)])
+                substat.extend([allele2, allele1, str(miss), str(maf), str(hetero)])
             else:
                 # In this case everything is missing or both alleles are
                 # missing and we can't calculate a maf
                 maf = 0.0
-                substat.extend([allele1, allele2, str(miss), str(maf)])
+                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
             
             stats.append(substat)
             
@@ -186,7 +187,7 @@ def dsfStat(filename):
 ###############################################################################
 def hmpStat(filename):
     print("Calculating statistics.")
-    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf"]]
+    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf", "het"]]
     counter = 0
     
     with open(filename, 'r') as infile:
@@ -230,18 +231,19 @@ def hmpStat(filename):
             # Calculate the maf
             count1 = 2*line[11:].count(allele1) + line[11:].count(het)
             count2 = 2*line[11:].count(allele2) + line[11:].count(het)
+            hetero = line[11:].count(het)/(len(line[11:]) - line[11:].count("N"))
             
             if count1 >= count2 and count1 != 0:
                 maf = count2/(count1 + count2)
-                substat.extend([allele1, allele2, str(miss), str(maf)])
+                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
             elif count2 > count1:
                 maf = count1/(count1 + count2)
-                substat.extend([allele2, allele1, str(miss), str(maf)])
+                substat.extend([allele2, allele1, str(miss), str(maf), str(hetero)])
             else:
                 # In this case everything is missing or both alleles are
                 # missing and we can't calculate a maf
                 maf = 0.0
-                substat.extend([allele1, allele2, str(miss), str(maf)])
+                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
             
             stats.append(substat)
             
@@ -268,7 +270,7 @@ def pedStat(filename):
     snps = zip(*snps)
       
     print("Calculating statistics.")
-    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf"]]
+    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf", "het"]]
     counter = 0      
     for s, m in zip(snps, smap):
         substat = [m[1], m[0], m[3]]
@@ -306,18 +308,19 @@ def pedStat(filename):
         # Calculate the maf
         count1 = 2*s.count(allele1) + s.count(het)
         count2 = 2*s.count(allele2) + s.count(het)
+        hetero = s.count(het)/(len(s) - s.count("N"))
         
         if count1 >= count2 and count1 != 0:
             maf = count2/(count1 + count2)
-            substat.extend([allele1, allele2, str(miss), str(maf)])
+            substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
         elif count2 > count1:
             maf = count1/(count1 + count2)
-            substat.extend([allele2, allele1, str(miss), str(maf)])
+            substat.extend([allele2, allele1, str(miss), str(maf), str(hetero)])
         else:
             # In this case everything is missing or both alleles are
             # missing and we can't calculate a maf
             maf = 0.0
-            substat.extend([allele1, allele2, str(miss), str(maf)])
+            substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
         
         stats.append(substat)
         
