@@ -11,6 +11,10 @@ import textwrap
 import timeit
 import os
 
+#########################################################
+#### Need to add retention list filtering for DSF and PED
+#########################################################
+
 ###############################################################################
 def warning(*objs):
     print("WARNING: ", *objs, end='\n', file=sys.stderr)
@@ -30,6 +34,10 @@ def version():
        3 = .ped (PLINK)
        
    Usage: python3 filter.py -s example.stat -i example.dsf -o filtered -m 1 -n 0.6 -f 0.05
+   
+   NOTE1: Retaining SNPs through a SNP list is currently only supported for HMP
+          files.
+   NOTE2: Using a SNP list cannot currently be combined with MAF/miss filtering.
        
    ############################################################################
    """
@@ -52,6 +60,7 @@ def get_parser():
                         type = float, default = 1.0)
     parser.add_argument('-f', '--maf', help = 'Minimum minor allele frequency',\
                         type = float, default = 0.0)
+    parser.add_argument('-r', '--retain', help = 'List of SNPs to retain', type = str, default = None)
 
     return parser
 
@@ -133,7 +142,7 @@ def filterDsf(inname, outname, stats, miss, maf):
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.dsf", " ].")
 
 ###############################################################################
-def filterHmp(inname, outname, stats, miss, maf):
+def filterHmp(inname, outname, stats, miss, maf, retain):
     print("Filtering [ ", inname, " ].")
 
     infile = open(inname, 'r')
@@ -149,14 +158,18 @@ def filterHmp(inname, outname, stats, miss, maf):
         snp = snp.split()
         if snp[0] not in stats:
             warning(snp[0] + " is not present in .stat file.")
-
-        # Filter or keep
-        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
+        
+        if retain is not None and snp[0] in retain:
             keepfile.write('\t'.join(snp) + '\n')
             kept += 1
         else:
-            filtfile.write('\t'.join(snp) + '\n')
-            filt += 1
+            # Filter or keep
+            if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
+                keepfile.write('\t'.join(snp) + '\n')
+                kept += 1
+            else:
+                filtfile.write('\t'.join(snp) + '\n')
+                filt += 1
         
         counter += 1
         if counter % 1e5 == 0:
@@ -239,6 +252,14 @@ def filterPed(inname, outname, stats, miss, maf):
             outfile.write('\t'.join(f) + '\n')
 
 ###############################################################################
+def getRetain(filename):
+    retain = {}
+    with open(filename, 'r') as infile:
+        for line in infile:
+            retain[line.strip()] = True
+    return retain
+
+###############################################################################
 if __name__ == '__main__':
     parser = get_parser()
     args = vars(parser.parse_args())
@@ -259,11 +280,15 @@ if __name__ == '__main__':
     checkFile(args['input'], args['mode'])
 
     stats = getStats(args['stat'])
+    if args['retain'] is not None:
+        retain = getRetain(args['retain'])
+    else:
+        retain = None
 
     if args['mode'] == 1:
         filterDsf(args['input'], args['output'], stats, args['miss'], args['maf'])
     elif args['mode'] == 2:
-        filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'])
+        filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'], retain)
     elif args['mode'] == 3:
         filterPed(args['input'], args['output'], stats, args['miss'], args['maf'])
     else:
