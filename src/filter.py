@@ -159,9 +159,13 @@ def filterHmp(inname, outname, stats, miss, maf, retain):
         if snp[0] not in stats:
             warning(snp[0] + " is not present in .stat file.")
         
-        if retain is not None and snp[0] in retain:
-            keepfile.write('\t'.join(snp) + '\n')
-            kept += 1
+        if retain is not None:
+            if snp[0] in retain:
+                keepfile.write('\t'.join(snp) + '\n')
+                kept += 1
+            else:
+                filtfile.write('\t'.join(snp) + '\n')
+                filt += 1
         else:
             # Filter or keep
             if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
