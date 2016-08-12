@@ -30,7 +30,7 @@ def readFile(filename, modei):
     else:
         warning("Unrecognized file format.")
     
-    print("Loaded [", d.shape[0], "] SNPs from [", d.shape[1] - 1, "] individuals.")
+    print("Loaded [", d.shape[1], "] SNPs from [", d.shape[0], "] individuals.")
     return d
 
 ###############################################################################
@@ -42,7 +42,9 @@ def readDSF(filename):
     
     d = pd.read_table(filename, sep = '\t')
     d.drop(['major', 'minor', 'miss', 'maf'], axis = 1, inplace = True)
-    return d
+    d = d.T
+    d.columns = d.iloc[0]
+    return d.reindex(d.index.drop('snpid'))
 
 ###############################################################################
 def readHMP(filename):
@@ -53,7 +55,10 @@ def readHMP(filename):
     
     d = pd.read_table(filename, sep = '\t')
     d.drop(['alleles', 'chrom', 'pos', 'strand', 'assembly#', 'center', 'protLSID', 'assayLSID', 'panel', 'QCcode'], axis = 1, inplace = True)
-    return d
+    d.columns = ['rs'] + d.columns[1:]
+    d = d.T
+    d.columns = d.iloc[0]
+    return d.reindex(d.index.drop('rs'))
 
 ###############################################################################
 def numericalize(snps):
@@ -68,14 +73,14 @@ def numericalize(snps):
     # Insert np.nan so Pandas recognizes missing data points
     snps.replace(to_replace = 'N', value = np.nan, inplace = True)
     
-    for i in range(snps.shape[0]):
+    for i in range(snps.shape[1]):
         # Progress updates
         counter += 1
-        if counter % 1e5 == 0:
+        if counter % 1e2 == 0:
             print("Processed", counter, "of", snps.shape[1] - 1, "markers.", end = '\r')
         
         # Get allele counts
-        allele_counts = snps.iloc[i, 1:].value_counts()
+        allele_counts = snps.iloc[:, i].value_counts()
         major_allele, minor_allele, het_allele = "N", "N", "N"
         major_count, minor_count, het_count = 0, 0, 0
         
@@ -90,23 +95,16 @@ def numericalize(snps):
                 minor_allele, minor_count = k, v
         
         # Replace alleles with numerical values
-        snps.iloc[i, 1:].replace(to_replace = [major_allele, minor_allele, het_allele], value = [major, minor, hetero], inplace = True)
-        
-    # Replace missing values with the mean of the genotypes
-    for i in range(1, snps.shape[1]):
+        snps.iloc[:, i].replace(to_replace = [major_allele, minor_allele, het_allele], value = [major, minor, hetero], inplace = True)
         snps.iloc[:, i] = pd.to_numeric(snps.iloc[:, i])
-    avg_alleles = snps.mean(axis = 1)
-    for i in range(snps.shape[0]):
-        snps.iloc[i, 1:] = snps.iloc[i, 1:].fillna(avg_alleles[i])
-
+        snps.iloc[:, i] = snps.iloc[:, i].fillna(snps.iloc[:, i].mean())
+        
 if __name__ == "__main__":
     parser = getParser()
     args = vars(parser.parse_args())
     
     if args['input'] is None or args['output'] is None:
         warning("Input/output file required.")
-    
-    print("Placeholder text.")
     
     st = timeit.default_timer()
     
@@ -117,13 +115,13 @@ if __name__ == "__main__":
     numericalize(snps)
     
     # Write the transposed SNP matrix to file
-    print("\nWriting SNPs to [", args['output'], ".xmat].")
-    snps.columns = ['taxa'] + list(snps.columns)[1:]
-    snps.T.to_csv(args['output'] + '.xmat', sep = '\t', header = False, index = True)
+    print("\nWriting SNPs to [", args['output'], "].xmat.")
+    snps.index.name = 'taxa'
+    snps.to_csv(args['output'] + '.xmat', sep = '\t', header = True, index = True)
     
     # Write the map file
-    print("Writing map file to [", args['output'], ".map].")
-    snp_ids = snps['taxa']
+    print("Writing map file to [", args['output'], "].map.")
+    snp_ids = list(snps.columns)
     with open(args['output'] + '.map', 'w') as outfile:
         outfile.write('\t'.join(['Chromosome', 'SNP', 'Genetic', 'Position']) + '\n')
         for s in snp_ids:
