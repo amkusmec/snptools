@@ -97,7 +97,7 @@ def checkFile(filename, modei):
             warning(".ped missing genotypes.")
             
         # Check the map file as well
-        with open(filename.split('.')[0] + ".map", 'r') as infile:
+        with open(filename[:-3] + "map", 'r') as infile:
             line = infile.readline().split()
         if len(line) != 4:
             warning(".map incorrectly formatted.")
@@ -119,7 +119,7 @@ def readFile(filename, modei):
         smap = []
         
         print("Reading from [ ", filename.split('.')[0] + ".map", " ].")
-        with open(filename.split('.')[0] + ".map", 'r') as infile:
+        with open(filename[:-3] + "map", 'r') as infile:
             for line in infile:
                 smap.append(line.split())
     else:
