@@ -60,6 +60,7 @@ def get_parser():
                         type = float, default = 1.0)
     parser.add_argument('-f', '--maf', help = 'Minimum minor allele frequency',\
                         type = float, default = 0.0)
+    parser.add_argument('-h', '--het', help = 'Maximum heterozygosity', type = float, default = 1.0)
     parser.add_argument('-r', '--retain', help = 'List of SNPs to retain', type = str, default = None)
 
     return parser
@@ -100,12 +101,12 @@ def getStats(filename):
         header = infile.readline()
         for line in infile:
             line = line.split()
-            stats[line[0]] = [float(line[5]), float(line[6])]
+            stats[line[0]] = [float(line[5]), float(line[6]), float(line[7])]
 
     return stats
 
 ###############################################################################
-def filterDsf(inname, outname, stats, miss, maf):
+def filterDsf(inname, outname, stats, miss, maf, het):
     print("Filtering [ ", inname, " ].")
 
     infile = open(inname, 'r')
@@ -123,7 +124,7 @@ def filterDsf(inname, outname, stats, miss, maf):
             warning(snp[0] + " is not present in .stat file.")
 
         # Filter or keep
-        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
+        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf and stats[snp[0]][2] <= het:
             keepfile.write('\t'.join(snp) + '\n')
             kept += 1
         else:
@@ -142,7 +143,7 @@ def filterDsf(inname, outname, stats, miss, maf):
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.dsf", " ].")
 
 ###############################################################################
-def filterHmp(inname, outname, stats, miss, maf, retain):
+def filterHmp(inname, outname, stats, miss, maf, het, retain):
     print("Filtering [ ", inname, " ].")
 
     infile = open(inname, 'r')
@@ -168,7 +169,7 @@ def filterHmp(inname, outname, stats, miss, maf, retain):
                 filt += 1
         else:
             # Filter or keep
-            if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf:
+            if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf and stats[snp[0]][2] <= het:
                 keepfile.write('\t'.join(snp) + '\n')
                 kept += 1
             else:
@@ -187,7 +188,7 @@ def filterHmp(inname, outname, stats, miss, maf, retain):
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.hmp.txt", " ].")
 
 ###############################################################################
-def filterPed(inname, outname, stats, miss, maf):
+def filterPed(inname, outname, stats, miss, maf, het):
     # Read the .map file and verify that it contains the same SNPs
     #  as the .stat file.
     mapname = inname.split('.')[0] + ".map"
@@ -221,7 +222,7 @@ def filterPed(inname, outname, stats, miss, maf):
     # Filter or keep
     kept = filt = counter = 0
     for index, value in enumerate(snps):
-        if stats[smap[index][1]][0] <= miss and stats[smap[index][1]][1] >= maf:
+        if stats[smap[index][1]][0] <= miss and stats[smap[index][1]][1] >= maf and stats[smap[index][1]][2] <= het:
             ksnps.append(value)
             kmap.append(smap[index])
             kept += 1
@@ -290,11 +291,11 @@ if __name__ == '__main__':
         retain = None
 
     if args['mode'] == 1:
-        filterDsf(args['input'], args['output'], stats, args['miss'], args['maf'])
+        filterDsf(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'])
     elif args['mode'] == 2:
-        filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'], retain)
+        filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'], retain)
     elif args['mode'] == 3:
-        filterPed(args['input'], args['output'], stats, args['miss'], args['maf'])
+        filterPed(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'])
     else:
         warning("Unrecognized input mode.")
     

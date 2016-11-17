@@ -1,3 +1,5 @@
-- Tools:
-	- Filter SNPs based on minor allele frequency and/or missing rates
-- Testing on 5022x250k files on the server for all conversions/functions
+- Add SNP list filtering for DSF and PED to 'filter'
+- Combine SNP list filtering with filtering for statistics?
+- Standardize 'numericalize' arguments and options
+- Reformat FORMATS
+- Redo the documentation
