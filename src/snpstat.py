@@ -51,10 +51,13 @@ def warning(*objs):
 def version():
    v0 = """
    ############################################################################
-   snpstat
+   snpstat - V1.5
    (c) 2015 Aaron Kusmec
    
-   Calculate missing rates and minor allele frequencies.
+   Calculate missing rates, minor allele frequencies, and heterozygosity.
+   Completely missing, monomorphic, and triallelic+ SNPs will be given values
+       of maf = -9, miss = 9, het = 9. These SNPs can be removed with filter
+       and appropriate values.
    Input modes,
        1 = .dsf
        2 = .hmp.txt
@@ -131,13 +134,13 @@ def calculate(snp):
     
     # Case where every site is missing
     if len(geno) == 0:
-        return ['N', 'N', str(1), str(-1), str(-1)]
+        return ['N', 'N', str(9), str(-9), str(9)]
     # Case where the SNP is monomorphic
     elif len(geno) == 1:
-        return [geno[0], 'N', str(miss), str(1 - miss), str(-1)]
+        return [geno[0], 'N', str(9), str(-9), str(9)]
     # Case where the SNP is triallelic or better
     elif len(geno) > 2:
-        return [geno[0], ','.join(geno[1:]), str(miss), str(-1), str(-1)]
+        return [geno[0], ','.join(geno[1:]), str(9), str(-9), str(9)]
     
     # If we made it here, the SNP is biallelic
     allele1, allele2 = geno[0], geno[1]
