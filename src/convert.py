@@ -130,8 +130,8 @@ def readFile(filename, modei):
 ###############################################################################
 def writeFile(snps, smap, filename):
     if smap is not None:
-        print("Writing [ ", filename.split('.')[0] + ".map", " ].")
-        with open(filename.split('.')[0] + ".map", 'w') as outfile:
+        print("Writing [ ", filename[:-3] + "map", " ].")
+        with open(filename[:-3] + "map", 'w') as outfile:
             for s in smap:
                 outfile.write('\t'.join(s) + '\n')
     
