@@ -116,6 +116,44 @@ def writeStats(stats, filename):
             outfile.write('\t'.join(s) + '\n')
 
 ###############################################################################
+def calculate(snp):
+    # Missing rate is simple to get
+    miss = snp.count('N')/len(snp)
+    
+    # Find the alleles
+    geno = list(set(snp))
+    for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
+        if k in geno:
+            geno += iupac2[k].split()
+    geno = set(geno)
+    geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
+    geno = list(geno)
+    
+    # Case where every site is missing
+    if len(geno) == 0:
+        return ['N', 'N', str(1), str(-1), str(-1)]
+    # Case where the SNP is monomorphic
+    elif len(geno) == 1:
+        return [geno[0], 'N', str(miss), str(1 - miss), str(-1)]
+    # Case where the SNP is triallelic or better
+    elif len(geno) > 2:
+        return [geno[0], ','.join(geno[1:]), str(miss), str(-1), str(-1)]
+    
+    # If we made it here, the SNP is biallelic
+    allele1, allele2 = geno[0], geno[1]
+    het = iupac[allele1 + allele2]
+    count1 = 2*snp.count(allele1) + snp.count(het)
+    count2 = 2*snp.count(allele2) + snp.count(het)
+    hetero = snp.count(het)/(len(snp) - snp.count('N'))
+    
+    if count1 >= count2:
+        maf = count2/(count1 + count2)
+        return [allele1, allele2, str(miss), str(maf), str(hetero)]
+    else:
+        maf = count1/(count1 + count2)
+        return [allele2, allele1, str(miss), str(maf), str(hetero)]
+
+###############################################################################
 def dsfStat(filename):
     print("Calculating statistics.")
     stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf", "het"]]
@@ -128,54 +166,7 @@ def dsfStat(filename):
         for line in infile:
             line = line.split()
             substat = [line[0], line[0].split('_')[0], line[0].split('_')[1]]
-            miss = line[5:].count("N")/len(line[5:])
-            
-            # Get the alleles
-            geno = set(line[5:]); geno = list(geno)
-            for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
-                if k in geno:
-                    geno += iupac2[k].split()
-            geno = set(geno)
-            geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
-            geno = list(geno)
-            
-            # Make sure we have two items in the allele list even if they are
-            # both missing
-            if len(geno) == 0:
-                geno.extend(['N', 'N'])
-            elif len(geno) == 1:
-                geno.append('N')
-            
-            # Get the alleles
-            allele1 = geno[0]
-            allele2 = geno[1]
-            
-            # Assign the heterozygous genotype
-            # If only one allele is present, we assign a nonsensical heterozygous
-            # genotype. If only heterozygotes were present in the SNP file, the
-            # code accounts for that and decomposes it into the diploid genotypes.
-            if allele1 == 'N' or allele2 == 'N':
-                het = 'ZZ'
-            else:
-                het = iupac[allele1 + allele2]
-            
-            # Calculate the maf
-            count1 = 2*line[5:].count(allele1) + line[5:].count(het)
-            count2 = 2*line[5:].count(allele2) + line[5:].count(het)
-            hetero = line[5:].count(het)/(len(line[5:]) - line[5:].count("N"))
-            
-            if count1 >= count2 and count1 != 0:
-                maf = count2/(count1 + count2)
-                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
-            elif count2 > count1:
-                maf = count1/(count1 + count2)
-                substat.extend([allele2, allele1, str(miss), str(maf), str(hetero)])
-            else:
-                # In this case everything is missing or both alleles are
-                # missing and we can't calculate a maf
-                maf = 0.0
-                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
-            
+            substat.extend(calculate(line[5:]))
             stats.append(substat)
             
             counter += 1
@@ -197,54 +188,7 @@ def hmpStat(filename):
         for line in infile:
             line = line.strip().split('\t')
             substat = [line[0], line[2], line[3]]
-            miss = line[11:].count('N')/len(line[11:])
-            
-            # Get the alleles
-            geno = set(line[11:]); geno = list(geno)
-            for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
-                if k in geno:
-                    geno += iupac2[k].split()
-            geno = set(geno)
-            geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
-            geno = list(geno)
-            
-            # Make sure we have two items in the allele list even if they are
-            # both missing
-            if len(geno) == 0:
-                geno.extend(['N', 'N'])
-            elif len(geno) == 1:
-                geno.append('N')
-            
-            # Get the alleles
-            allele1 = geno[0]
-            allele2 = geno[1]
-            
-            # Assign the heterozygous genotype
-            # If only one allele is present, we assign a nonsensical heterozygous
-            # genotype. If only heterozygotes were present in the SNP file, the
-            # code accounts for that and decomposes it into the diploid genotypes.
-            if allele1 == 'N' or allele2 == 'N':
-                het = 'ZZ'
-            else:
-                het = iupac[allele1 + allele2]
-            
-            # Calculate the maf
-            count1 = 2*line[11:].count(allele1) + line[11:].count(het)
-            count2 = 2*line[11:].count(allele2) + line[11:].count(het)
-            hetero = line[11:].count(het)/(len(line[11:]) - line[11:].count("N"))
-            
-            if count1 >= count2 and count1 != 0:
-                maf = count2/(count1 + count2)
-                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
-            elif count2 > count1:
-                maf = count1/(count1 + count2)
-                substat.extend([allele2, allele1, str(miss), str(maf), str(hetero)])
-            else:
-                # In this case everything is missing or both alleles are
-                # missing and we can't calculate a maf
-                maf = 0.0
-                substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
-            
+            substat.extend(calculate(line[11:]))
             stats.append(substat)
             
             counter += 1
@@ -274,54 +218,7 @@ def pedStat(filename):
     counter = 0      
     for s, m in zip(snps, smap):
         substat = [m[1], m[0], m[3]]
-        miss = s.count("N")/len(s)
-        
-        # Get the alleles
-        geno = set(s); geno = list(geno)
-        for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
-            if k in geno:
-                geno += iupac2[k].split()
-        geno = set(geno)
-        geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
-        geno = list(geno)
-        
-        # Make sure we have two items in the allele list even if they are
-        # both missing
-        if len(geno) == 0:
-            geno.extend(['N', 'N'])
-        elif len(geno) == 1:
-            geno.append('N')
-        
-        # Get the alleles
-        allele1 = geno[0]
-        allele2 = geno[1]
-        
-        # Assign the heterozygous genotype
-        # If only one allele is present, we assign a nonsensical heterozygous
-        # genotype. If only heterozygotes were present in the SNP file, the
-        # code accounts for that and decomposes it into the diploid genotypes.
-        if allele1 == 'N' or allele2 == 'N':
-            het = 'ZZ'
-        else:
-            het = iupac[allele1 + allele2]
-        
-        # Calculate the maf
-        count1 = 2*s.count(allele1) + s.count(het)
-        count2 = 2*s.count(allele2) + s.count(het)
-        hetero = s.count(het)/(len(s) - s.count("N"))
-        
-        if count1 >= count2 and count1 != 0:
-            maf = count2/(count1 + count2)
-            substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
-        elif count2 > count1:
-            maf = count1/(count1 + count2)
-            substat.extend([allele2, allele1, str(miss), str(maf), str(hetero)])
-        else:
-            # In this case everything is missing or both alleles are
-            # missing and we can't calculate a maf
-            maf = 0.0
-            substat.extend([allele1, allele2, str(miss), str(maf), str(hetero)])
-        
+        substat.extend(calculate(s))
         stats.append(substat)
         
         counter += 1
