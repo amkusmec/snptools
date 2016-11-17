@@ -59,12 +59,11 @@ def getParser():
     
     parser.add_argument('-p', '--path', help = 'Path of the input files', \
                         nargs='?', default=os.getcwd())
+    parser.add_argument('-s', '--stat', help = 'SNP statistic file', type = str)
     parser.add_argument('-i', '--input', help = 'Input file', type = str)
     parser.add_argument('-o', '--output', help = 'Output file stem', type = str)
     parser.add_argument('-mi', '--modei', help = 'Input mode', type  = int)
-    parser.add_argument('-c', '--coding', help = '1-based if True, 0-based if False', \
-                        action = "store_true", default = False)
-    parser.add_argument('-a', '--additive', help = 'Additive coding if True, dominance coding if False', \
+    parser.add_argument('-d', '--dominance', help = 'Enable dominance coding', \
                         action = "store_true", default = False)
     
     return parser
@@ -134,61 +133,47 @@ def readFile(filename, modei):
     return snps
 
 ###############################################################################
-def numericalizeA(snps, coding):
+def readStat(filename):
+    print("Reading [ ", filename, " ].")
+
+    stats = {}
+    with open(filename, 'r') as infile:
+        header = infile.readline()
+        for line in infile:
+            line = line.split()
+            stats[line[0]] = { 'major' : line[3], 'minor' : line[4], 'maf' : float(line[6]), 'het' : float(line[7]) }
+    
+    return stats
+
+###############################################################################
+def numericalizeA(snps, stats):
     counter = 0
     num = [snps[0]]
     
-    if coding:
-        major = '0'
-        minor = '2'
-        hetero = 0
-    else:
-        major = '-1'
-        minor = '1'
-        hetero = -1
-
     for s in snps[1:]:
         counter += 1
         if counter % 1e5 == 0:
             print("Processed ", str(counter), " of ", str(len(snps) - 1), " markers.")
         
-        geno = list(set(s[1:]))
-        for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
-            if k in geno:
-                geno += iupac2[k].split()
-        geno = set(geno)
-        geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
-        geno = list(geno)
-        allele1 = geno[0]
-        if len(geno) == 2:
-            allele2 = geno[1]
-        else:
-            allele2 = 'N'
-        het = iupac[allele1 + allele2]
+        if s[0] not in stats:
+            warning(s[0] + " is not present in .stat file.")
         
-        count1 = 2*s[1:].count(allele1) + s[1:].count(het)
-        count2 = 2*s[1:].count(allele2) + s[1:].count(het)
+        # Get the heterozygous code
+        het = iupac[''.join([stats[s[0]]['major'], stats[s[0]]['minor']])]
         
+        # Do the numerical conversion
         x = '\t'.join(s[1:])
-        
-        if count1 >= count2:
-            maf = count2/(count1 + count2)
-            x = x.replace(allele1, major)
-            x = x.replace(allele2, minor)
-        else:
-            maf = count1/(count1 + count2)
-            x = x.replace(allele1, minor)
-            x = x.replace(allele2, major)
-        
-        x = x.replace(het, str(hetero + 1))
-        x = x.replace('N', str(hetero + 2*maf))
+        x = x.replace(stats[s[0]]['major'], '0')
+        x = x.replace(stats[s[0]]['minor'], '2')
+        x = x.replace(het, '1')
+        x = x.replace('N', str(2*stats[s[0]]['maf']))
         
         num.append([s[0]] + x.split('\t'))
     
     return num
 
 ###############################################################################
-def numericalizeD(snps):
+def numericalizeD(snps, stats):
     counter = 0
     num = [snps[0]]
     
@@ -197,25 +182,18 @@ def numericalizeD(snps):
         if counter % 1e5 == 0:
             print("Processed ", str(counter), " of ", str(len(snps) - 1), " markers.")
         
-        geno = list(set(s[1:]))
-        for k in ['W', 'S', 'M', 'K', 'R', 'Y', '0']:
-            if k in geno:
-                geno += iupac2[k].split()
-        geno = set(geno)
-        geno = geno.difference(set(['W', 'S', 'M', 'K', 'R', 'Y', '0', 'N']))
-        geno = list(geno)
-        allele1 = geno[0]
-        if len(geno) == 2:
-            allele2 = geno[1]
-        else:
-            allele2 = 'N'
-        het = iupac[allele1 + allele2]
+        if s[0] not in stats:
+            warning(s[0] + " is not in the .stat file.")
         
+        # Get the heterozygous code
+        het = iupac[''.join([stats[s[0]]['major'], stats[s[0]]['minor']])]
+        
+        # Perform the numerical conversion
         x = '\t'.join(s[1:])
-        x = x.replace(allele1, '0')
+        x = x.replace(stats[s[0]]['major'], '0')
+        x = x.replace(stats[s[0]]['minor'], '0')
         x = x.replace(het, '1')
-        x = x.replace(allele2, '0')
-        x = x.replace('N', '0') # Assume that missing genotypes are not heterozygous
+        x = x.replace('N', str(stats[s[0]]['het']))
         
         num.append([s[0]] + x.split('\t'))
         
@@ -246,6 +224,8 @@ if __name__ == "__main__":
         os.chdir(args['path'])
     if args['input'] is None or args['output'] is None:
         warning("Input/output file required.")
+    if args['stat'] is None:
+        warning("Statistic file required.")
     
     print(version())
     
@@ -255,10 +235,14 @@ if __name__ == "__main__":
     print("Reading from [ ", args['input'], " ].")
     snps = readFile(args['input'], args['modei'])
     
-    if args['additive']:
-        num = numericalizeA(snps, args['coding'])
-    elif not args['additive']:
-        num = numericalizeD(snps)
+    stats = readStat(args['stat'])
+    
+    if args['dominance']:
+        print("Using dominance coding.")
+        num = numericalizeD(snps, stats)
+    else:
+        print("Using additive coding.")
+        num = numericalizeA(snps, stats)
     
     writeFile(num, args['output'])    
     
