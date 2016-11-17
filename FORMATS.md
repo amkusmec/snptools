@@ -33,6 +33,7 @@
 **File extension:** `.hmp.txt`
 
 All SNPs are coded using single-bit ambiguity codes. `snptools` does *not* support two-bit coding. Column headers and definitions are
+
 1. `rs` OR `rs#` - alphanumeric SNP identifier
 2. `alleles` - separate by '/'; if possible `snptools` uses major/minor ordering
 3. `chrom` - chromosome number
@@ -56,6 +57,7 @@ These formats are compatible with Sean Purcell's PLINK software <pngu.mgh.harvar
 #### Pedigree file
 
 All SNPs are coded using double-bit IUPAC nucleotide codes. Note that while PLINK accepts any biallelic coding scheme and arbitrary missing genotypes, `snptools` only operates on standard IUPAC codes. Columns do *not* have headers. Column definitions are
+
 1. Family ID
 2. Individual ID
 3. Paternal ID
@@ -68,6 +70,7 @@ Columns 7+ are biallelic SNP genotypes. Every two columns contains the SNP calls
 #### Map file
 
 Each row contains the map information for a single SNP, presented in the same order in which they occur in the pedigree file. Columns do *not* have headers. Columns definitions are
+
 1. Chromosome
 2. Unique SNP identifier
 3. Genetic distance (Morgans)
@@ -78,6 +81,7 @@ Each row contains the map information for a single SNP, presented in the same or
 **File extension:** `.dsf`
 
 All SNPs are coded using single-bit IUPAC codes. Columns headers and definitions are
+
 1. `snpid` - alphanumeric identifier; typicallly chr_pos
 2. `major` - major (most common) allele
 3. `minor` - minor (least common) allele
