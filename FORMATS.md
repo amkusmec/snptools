@@ -33,19 +33,19 @@
 **File extension:** `.hmp.txt`
 
 All SNPs are coded using single-bit ambiguity codes. `snptools` does *not* support two-bit coding. Column headers and definitions are
-0. `rs` OR `rs#` - alphanumeric SNP identifier
-1. `alleles` - separate by '/'; if possible `snptools` uses major/minor ordering
-2. `chrom` - chromosome number
-3. `pos` - physical (bp) position
-4. `strand` - one of +, -, *
-5. `assembly`
-6. `center`
-7. `protLSID` - protocol ID
-8. `assayLSID`
-9. `panel`
-10. `QCcode`
+1. `rs` OR `rs#` - alphanumeric SNP identifier
+2. `alleles` - separate by '/'; if possible `snptools` uses major/minor ordering
+3. `chrom` - chromosome number
+4. `pos` - physical (bp) position
+5. `strand` - one of +, -, *
+6. `assembly`
+7. `center`
+8. `protLSID` - protocol ID
+9. `assayLSID`
+10. `panel`
+11. `QCcode`
 
-Columns 11+ are named by sample and contain the SNP genotype calls for each sample.
+Columns 12+ are named by sample and contain the SNP genotype calls for each sample.
 
 ### PLINK
 
@@ -56,35 +56,35 @@ These formats are compatible with Sean Purcell's PLINK software <pngu.mgh.harvar
 #### Pedigree file
 
 All SNPs are coded using double-bit IUPAC nucleotide codes. Note that while PLINK accepts any biallelic coding scheme and arbitrary missing genotypes, `snptools` only operates on standard IUPAC codes. Columns do *not* have headers. Column definitions are
-0. Family ID
-1. Individual ID
-2. Paternal ID
-3. Maternal ID
-4. Sex
-5. Phenotype
+1. Family ID
+2. Individual ID
+3. Paternal ID
+4. Maternal ID
+5. Sex
+6. Phenotype
 
 Columns 7+ are biallelic SNP genotypes. Every two columns contains the SNP calls for a single site. Note that of the first six columns, `snptools` only operates on the family ID.
 
 #### Map file
 
 Each row contains the map information for a single SNP, presented in the same order in which they occur in the pedigree file. Columns do *not* have headers. Columns definitions are
-0. Chromosome
-1. Unique SNP identifier
-2. Genetic distance (Morgans)
-3. Physical position (bp)
+1. Chromosome
+2. Unique SNP identifier
+3. Genetic distance (Morgans)
+4. Physical position (bp)
 
 ### Density SNP Format
 
 **File extension:** `.dsf`
 
 All SNPs are coded using single-bit IUPAC codes. Columns headers and definitions are
-0. `snpid` - alphanumeric identifier; typicallly chr_pos
-1. `major` - major (most common) allele
-2. `minor` - minor (least common) allele
-3. `miss` - missing rate
-4. `maf` - minor allele frequency
+1. `snpid` - alphanumeric identifier; typicallly chr_pos
+2. `major` - major (most common) allele
+3. `minor` - minor (least common) allele
+4. `miss` - missing rate
+5. `maf` - minor allele frequency
 
-Columns 5+ are named by sample and contain the SNP calls for each sample.
+Columns 6+ are named by sample and contain the SNP calls for each sample.
 
 ### Numerical
 
