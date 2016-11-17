@@ -60,7 +60,7 @@ def get_parser():
                         type = float, default = 1.0)
     parser.add_argument('-f', '--maf', help = 'Minimum minor allele frequency',\
                         type = float, default = 0.0)
-    parser.add_argument('-h', '--het', help = 'Maximum heterozygosity', type = float, default = 1.0)
+    parser.add_argument('-ht', '--het', help = 'Maximum heterozygosity', type = float, default = 1.0)
     parser.add_argument('-r', '--retain', help = 'List of SNPs to retain', type = str, default = None)
 
     return parser
