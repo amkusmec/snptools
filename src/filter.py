@@ -50,7 +50,7 @@ def get_parser():
     parser.add_argument('-s', '--stat', help = 'Stat file', type = str)
     parser.add_argument('-i', '--input', help = 'Input file', type = str)
     parser.add_argument('-o', '--output', help = 'Output file (no ext)', type = str)
-    parser.add_argument('-m', '--mode', help = 'I/O mode', type = int)
+    parser.add_argument('-mi', '--modei', help = 'Input (and output) mode', type = int)
     parser.add_argument('-n', '--miss', help = 'Max missing rate', \
                         type = float, default = 1.0)
     parser.add_argument('-f', '--maf', help = 'Minimum minor allele frequency',\
