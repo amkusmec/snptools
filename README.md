@@ -1,14 +1,14 @@
 # snptools
 
 ### Contents
-    - [Overview](#overview)
-      - [File Formats](#file-formats)
-      - [Getting Help](#getting-help)
-    - [Convert](#convert)
-    - [Filter](#filter)
-    - [Find Alleles](#find-alleles)
-    - [Numericalize](#numericalize)
-    - [SNP Statistics](#snp-statistics)
+- [Overview](#overview)
+  - [File Formats](#file-formats)
+  - [Getting Help](#getting-help)
+- [Convert](#convert)
+- [Filter](#filter)
+- [Find Alleles](#find-alleles)
+- [Numericalize](#numericalize)
+- [SNP Statistics](#snp-statistics)
 
 ## Overview
 
