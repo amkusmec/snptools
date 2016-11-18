@@ -100,6 +100,7 @@ This function identifies the major and minor alleles, minor allele frequencies, 
 - minor allele frequency = -9
 - missing rate = 9
 - heterozygosity = 9
+
 Such SNPs will be removed by the default parameters of `filter`.
 
 ```
