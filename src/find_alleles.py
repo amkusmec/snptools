@@ -1,44 +1,8 @@
-import sys
 import argparse
 import textwrap
 import timeit
 import os
-
-# Define a dictionary converting IUPAC multi-base codes
-iupac = { 'AT': 'W', 'TA': 'W',
-          'CG': 'S', 'GC': 'S',
-          'AC': 'M', 'CA': 'M',
-          'GT': 'K', 'TG': 'K',
-          'AG': 'R', 'GA': 'R',
-          'CT': 'Y', 'TC': 'Y',
-          '+-': '0', '-+': '0',
-          'AA': 'A', 'CC': 'C',
-          'GG': 'G', 'TT': 'T',
-          'NN': 'N'
-          }
-
-iupac2 = { 'A': 'A A', 'C': 'C C', 'G': 'G G', 'T': 'T T',
-           'M': 'A C', 'R': 'A G', 'W': 'A T', 'S': 'C G',
-           'Y': 'C T', 'K': 'G T', 'N': 'N N', '+': '+ +',
-           '-': '- -', '0': '+ -'
-         }
-
-iupac3 = { 'A T': 'W', 'T A': 'W',
-           'C G': 'S', 'G C': 'S',
-           'A C': 'M', 'C A': 'M',
-           'G T': 'K', 'T G': 'K',
-           'A G': 'R', 'G A': 'R',
-           'C T': 'Y', 'T C': 'Y',
-           '+ -': '0', '- +': '0',
-           'A A': 'A', 'C C': 'C',
-           'G G': 'G', 'T T': 'T',
-           'N N': 'N'
-           }
-
-###############################################################################
-def warning(*objs):
-    print("WARNING: ", *objs, end='\n', file=sys.stderr)
-    sys.exit()
+from snptools import *
 
 ###############################################################################
 def version():
@@ -71,24 +35,6 @@ def get_parser():
     parser.add_argument('-mi', '--modei', help = 'Input mode', type = int)
 
     return parser
-
-###############################################################################
-def checkFile(filename, modei):
-    print("Checking [ ", filename, " ].")
-    
-    with open(filename, 'r') as infile:
-        line = infile.readline().split()
-    
-    if modei == 1:
-        if line[0] != "snpid" or line[1] != "major" or line[2] != "minor":
-            warning(".dsf formatted incorrectly.")
-    elif modei == 2:
-        if line[0] != "rs" and line[0] != "rs#":
-            warning(".hmp.txt formatted incorrectly.")
-    else:
-        warning("Unrecognized file format.")
-    
-    print("[ ", filename, " ] is appropriately formatted.")
 
 ###############################################################################
 def findAllelesDsf(inname, outname):

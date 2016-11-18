@@ -5,27 +5,11 @@ Created on Wed May 13 15:11:53 2015
 @author: Aaron Kusmec
 """
 
-import sys
 import argparse
 import textwrap
 import timeit
 import os
-
-# Define a dictionary converting IUPAC multi-base codes
-iupac = { 'AT': 'W', 'TA': 'W',
-          'CG': 'S', 'GC': 'S',
-          'AC': 'M', 'CA': 'M',
-          'GT': 'K', 'TG': 'K',
-          'AG': 'R', 'GA': 'R',
-          'CT': 'Y', 'TC': 'Y',
-          '+-': '0', '-+': '0',
-          'AA': 'A', 'CC': 'C',
-          'GG': 'G', 'TT': 'T',
-          'NN': 'N'
-          }
-
-iupac2 = { 'W': 'A T', 'S': 'C G', 'M': 'A C', 'K': 'G T',
-           'R': 'A G', 'Y': 'C T', '0': '+ -' }
+from snptools import *
 
 ###############################################################################
 def version():
@@ -46,11 +30,6 @@ def version():
     return v0
 
 ###############################################################################
-def warning(*objs):
-    print("WARNING: ", *objs, end='\n', file=sys.stderr)
-    sys.exit()
-    
-###############################################################################
 def getParser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -68,29 +47,6 @@ def getParser():
     
     return parser
 
-###############################################################################
-def checkFile(filename, modei):
-    with open(filename, 'r') as infile:
-        line = infile.readline().split()
-    
-    if modei == 1:
-        if line[0] != "snpid" or line[1] != "major" or line[2] != "minor":
-            warning(".dsf formatted incorrectly.")
-    elif modei == 2:
-        if line[0] != "rs" and line[0] != "rs#":
-            warning(".hmp.txt formatted incorrectly.")
-    elif modei == 3:
-        if len(line) <= 6:
-            warning(".ped missing genotypes.")
-            
-        # Check the map file as well
-        with open(filename.split('.')[0] + ".map", 'r') as infile:
-            line = infile.readline().split()
-        if len(line) != 4:
-            warning(".map incorrectly formatted.")
-    else:
-        warning("Unrecognized file format.")
-    
 ###############################################################################
 def readFile(filename, modei):
     snps = []

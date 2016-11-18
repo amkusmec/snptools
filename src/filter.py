@@ -5,20 +5,15 @@ Created on Wed May 27 14:47:00 2015
 @author: aaron
 """
 
-import sys
 import argparse
 import textwrap
 import timeit
 import os
+from snptools import *
 
 #########################################################
 #### Need to add retention list filtering for DSF and PED
 #########################################################
-
-###############################################################################
-def warning(*objs):
-    print("WARNING: ", *objs, end='\n', file=sys.stderr)
-    sys.exit()
 
 ###############################################################################
 def version():
@@ -44,7 +39,7 @@ def version():
    
    return v0
 
-###############################################################################  
+#############################################################################  
 def get_parser():
     parser = argparse.ArgumentParser(
         formatter_class = argparse.RawDescriptionHelpFormatter,
@@ -64,33 +59,6 @@ def get_parser():
     parser.add_argument('-r', '--retain', help = 'List of SNPs to retain', type = str, default = None)
 
     return parser
-
-###############################################################################
-def checkFile(filename, mode):
-    print("Checking [ ", filename, " ].")
-    
-    with open(filename, 'r') as infile:
-        line = infile.readline().split()
-    
-    if mode == 1:
-        if line[0] != "snpid" or line[1] != "major" or line[2] != "minor":
-            warning(".dsf formatted incorrectly.")
-    elif mode == 2:
-        if line[0] != "rs" and line[0] != "rs#":
-            warning(".hmp.txt formatted incorrectly.")
-    elif mode == 3:
-        if len(line) <= 6:
-            warning(".ped missing genotypes.")
-            
-        # Check the map file as well
-        with open(filename.split('.')[0] + ".map", 'r') as infile:
-            line = infile.readline().split()
-        if len(line) != 4:
-            warning(".map incorrectly formatted.")
-    else:
-        warning("Unrecognized file format.")
-    
-    print("[ ", filename, " ] is appropriately formatted.")
 
 ###############################################################################
 def getStats(filename):
