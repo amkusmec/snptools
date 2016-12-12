@@ -250,7 +250,7 @@ if __name__ == '__main__':
     st = timeit.default_timer()
     
     # Check input file
-    checkFile(args['input'], args['mode'])
+    checkFile(args['input'], args['modei'])
 
     stats = getStats(args['stat'])
     if args['retain'] is not None:
@@ -258,11 +258,11 @@ if __name__ == '__main__':
     else:
         retain = None
 
-    if args['mode'] == 1:
+    if args['modei'] == 1:
         filterDsf(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'])
-    elif args['mode'] == 2:
+    elif args['modei'] == 2:
         filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'], retain)
-    elif args['mode'] == 3:
+    elif args['modei'] == 3:
         filterPed(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'])
     else:
         warning("Unrecognized input mode.")
