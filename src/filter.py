@@ -28,7 +28,7 @@ def version():
        2 = .hmp.txt
        3 = .ped (PLINK)
        
-   Usage: python3 filter.py -s example.stat -i example.dsf -o filtered -m 1 -n 0.6 -f 0.05
+   Usage: python3 filter.py -s example.stat -i example.dsf -o filtered -mi 1 -n 0.6 -f 0.05
    
    NOTE1: Retaining SNPs through a SNP list is currently only supported for HMP
           files.
