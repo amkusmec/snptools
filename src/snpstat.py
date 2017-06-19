@@ -149,8 +149,11 @@ def pedStat(filename):
     snps = []
     with open(filename, 'r') as infile:
         for line in infile:
-            line = line.strip().split('\t')[6:]
-            snps.append([iupac3[l] for l in line])
+            tsnp = []
+            line = line.strip().split()
+            for i in range(6, len(line), 2):
+               tsnp.append(iupac[line[i] + line[i+1]])
+               snps.append(tsnp)
     snps = zip(*snps)
       
     print("Calculating statistics.")
