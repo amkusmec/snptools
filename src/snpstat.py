@@ -81,6 +81,21 @@ def calculate(snp):
     
     # If we made it here, the SNP is biallelic
     allele1, allele2 = geno[0], geno[1]
+    
+    # Check for an insertion/deletion without proper coding
+    if (allele1 == '+' or allele1 == '-') and \
+       (allele2 != '+' and allele2 != '-'):
+       if allele1 == '+':
+          allele2 = '-'
+       else:
+          allele2 = '+'
+    elif (allele2 == '+' or allele2 == '-') and \
+         (allele1 != '+' and allele2 != '-'):
+       if allele2 == '+':
+          allele1 = '-'
+       else:
+          allele1 = '+'
+    
     het = iupac[allele1 + allele2]
     count1 = 2*snp.count(allele1) + snp.count(het)
     count2 = 2*snp.count(allele2) + snp.count(het)
