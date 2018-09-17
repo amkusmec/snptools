@@ -90,7 +90,7 @@ def calculate(snp):
        else:
           allele2 = '+'
     elif (allele2 == '+' or allele2 == '-') and \
-         (allele1 != '+' and allele2 != '-'):
+         (allele1 != '+' and allele1 != '-'):
        if allele2 == '+':
           allele1 = '-'
        else:
