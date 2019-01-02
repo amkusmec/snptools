@@ -170,7 +170,7 @@ def writeFile(num, stats, filename):
                 outfile.write('\t'.join(n) + '\n')
                 with open(filename + '.map', 'w') as mapfile:
                     for n2 in n[1:]:
-                        mapfile.write('\t'.join([s[n2]['chr'], s[n2]['id'], '0', s[n2]['pos']]) + '\n')
+                        mapfile.write('\t'.join([stats[n2]['chr'], stats[n2]['id'], '0', stats[n2]['pos']]) + '\n')
                     map_written = True
 
 if __name__ == "__main__":
