@@ -161,13 +161,17 @@ def writeFile(num, stats, filename):
     print("Transposing SNP matrix.")
     num = zip(*num)
     
-    with open(filename + '.map', 'w') as outfile:
-        for s in stats:
-            outfile.write('\t'.join([s['chr'], s['id'], '0', s['pos']]) + '\n')
-    
+    map_written = False
     with open(filename + '.xmat', 'w') as outfile:
         for n in num:
-            outfile.write('\t'.join(n) + '\n')
+            if map_written:
+                outfile.write('\t'.join(n) + '\n')
+            else:
+                outfile.write('\t'.join(n) + '\n')
+                with open(filename + '.map', 'w') as mapfile:
+                    for n2 in n[1:]:
+                        mapfile.write('\t'.join([s[n2]['chr'], s[n2]['id'], '0', s[n2]['pos']]) + '\n')
+                    map_written = True
 
 if __name__ == "__main__":
     parser = getParser()
