@@ -97,7 +97,7 @@ def readStat(filename):
         header = infile.readline()
         for line in infile:
             line = line.split()
-            stats[line[0]] = { 'major' : line[3], 'minor' : line[4], 'maf' : float(line[6]), 'het' : float(line[7]) }
+            stats[line[0]] = { 'id' : line[0], 'chr' : line[1], 'pos' : line[2], 'major' : line[3], 'minor' : line[4], 'maf' : float(line[6]), 'het' : float(line[7]) }
     
     return stats
 
@@ -163,7 +163,7 @@ def writeFile(num, stats, filename):
     
     with open(filename + '.map', 'w') as outfile:
         for s in stats:
-            outfile.write('\t'.join([s[1], s[0], '0', s[2]]) + '\n')
+            outfile.write('\t'.join([s['chr'], s['id'], '0', s['pos']]) + '\n')
     
     with open(filename + '.xmat', 'w') as outfile:
         for n in num:
