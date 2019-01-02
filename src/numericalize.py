@@ -114,14 +114,15 @@ def numericalizeA(snps, stats):
         if s[0] not in stats:
             warning(s[0] + " is not present in .stat file.")
         
-        # Get the heterozygous code
-        het = iupac[''.join([stats[s[0]]['major'], stats[s[0]]['minor']])]
-        
         # Do the numerical conversion
         x = '\t'.join(s[1:])
         x = x.replace(stats[s[0]]['major'], '0')
         x = x.replace(stats[s[0]]['minor'], '2')
-        x = x.replace(het, '1')
+        
+        if stats[s[0]]['major'] != 'N' and stats[s[0]]['minor'] != 'N':
+            het = iupac[''.join([stats[s[0]]['major'], stats[s[0]]['minor']])]
+            x = x.replace(het, '1')
+        
         x = x.replace('N', str(2*stats[s[0]]['maf']))
         
         num.append([s[0]] + x.split('\t'))
@@ -156,21 +157,17 @@ def numericalizeD(snps, stats):
     return num
 
 ###############################################################################
-def writeFile(num, filename):
+def writeFile(num, stats, filename):
     print("Transposing SNP matrix.")
     num = zip(*num)
     
-    map_written = False
+    with open(filename + '.map', 'w') as outfile:
+        for s in stats:
+            outfile.write('\t'.join([s[1], s[0], '0', s[2]] + '\n'))
+    
     with open(filename + '.xmat', 'w') as outfile:
         for n in num:
-            if map_written:
-                outfile.write('\t'.join(n) + '\n')
-            else:
-                outfile.write('\t'.join(n) + '\n')
-                with open(filename + '.map', 'w') as mapfile:
-                    for n2 in n[1:]:
-                        mapfile.write('\t'.join([n2.split('_')[0], n2, '0', n2.split('_')[1]]) + '\n')
-                map_written = True
+            outfile.write('\t'.join(n) + '\n')
 
 if __name__ == "__main__":
     parser = getParser()
@@ -200,7 +197,7 @@ if __name__ == "__main__":
         print("Using additive coding.")
         num = numericalizeA(snps, stats)
     
-    writeFile(num, args['output'])    
+    writeFile(num, stats, args['output'])    
     
     et = timeit.default_timer()
     
