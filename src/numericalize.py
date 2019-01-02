@@ -163,7 +163,7 @@ def writeFile(num, stats, filename):
     
     with open(filename + '.map', 'w') as outfile:
         for s in stats:
-            outfile.write('\t'.join([s[1], s[0], '0', s[2]] + '\n'))
+            outfile.write('\t'.join([s[1], s[0], '0', s[2]]) + '\n')
     
     with open(filename + '.xmat', 'w') as outfile:
         for n in num:
