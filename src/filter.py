@@ -19,14 +19,17 @@ from snptools import *
 def version():
    v0 = """
    ############################################################################
-   filter
+   filter V1.1
    (c) 2015 Aaron Kusmec
+   
+   N.B. VCF functionality is experimental. Use at your own risk.
    
    Filter SNPs based on missing rates/minor allele frequencies.
    Input modes,
        1 = .dsf
        2 = .hmp.txt
        3 = .ped (PLINK)
+       4 = .vcf
        
    Usage: python3 filter.py -s example.stat -i example.dsf -o filtered -mi 1 -n 0.6 -f 0.05
    
@@ -225,6 +228,46 @@ def filterPed(inname, outname, stats, miss, maf, het):
             outfile.write('\t'.join(f) + '\n')
 
 ###############################################################################
+def filterVcf(inname, outname, stats, miss, maf, het):
+    print("Filtering [ ", inname, " ].")
+    
+    infile = open(inname, 'r')
+    keepfile = open(outname + ".vcf", 'w')
+    filtfile = open(outname + "_filtered.vcf", 'w')
+    
+    kept = filt = counter = 0
+    for snp in infile:
+        snp = snp.strip()
+        
+        if snp[0] == "#":
+            keepfile.write(snp + '\n')
+            filtfile.write(snp + '\n')
+            continue
+        
+        # Filter or keep
+        snp = snp.split()
+        if snp[0] not in stats:
+            warning(snp[0] + " is not present in .stat file.")
+        
+        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf and stats[snp[0]][2] <= het:
+            keepfile.write('\t'.join(snp) + '\n')
+            kept += 1
+        else:
+            filtfile.write('\t'.join(snp) + '\n')
+            filt += 1
+        
+        counter += 1
+        if counter % 1e5 == 0:
+            print("Processed [ ", str(counter), " ] SNPs.")
+    
+    infile.close()
+    keepfile.close()
+    filtfile.close()
+    
+    print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".vcf", " ].")
+    print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.vcf", " ].")
+
+###############################################################################
 def getRetain(filename):
     retain = {}
     with open(filename, 'r') as infile:
@@ -264,10 +307,12 @@ if __name__ == '__main__':
         filterHmp(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'], retain)
     elif args['modei'] == 3:
         filterPed(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'])
+    elif args['modei'] == 4:
+        filterVcf(args['input'], args['output'], stats, args['miss'], args['maf'], args['het'])
     else:
         warning("Unrecognized input mode.")
     
     et = timeit.default_timer()
 
-    print("Conversion finished.")
+    print("Filtering finished.")
     print("Time: %.2f min." % ((et - st)/60))
