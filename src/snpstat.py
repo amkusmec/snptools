@@ -15,8 +15,10 @@ from snptools import *
 def version():
    v0 = """
    ############################################################################
-   snpstat - V1.5
+   snpstat - V1.5.1
    (c) 2015 Aaron Kusmec
+   
+   N.B. VCF functionality is limited and experimental. Use at your own risk.
    
    Calculate missing rates, minor allele frequencies, and heterozygosity.
    Completely missing, monomorphic, and triallelic+ SNPs will be given values
@@ -26,6 +28,7 @@ def version():
        1 = .dsf
        2 = .hmp.txt
        3 = .ped (PLINK)
+       4 = .vcf
        
    Usage: python3 snpstat.py -i example.dsf -o example.stat -mi 1
        
@@ -109,6 +112,38 @@ def calculate(snp):
         return [allele2, allele1, str(miss), str(maf), str(hetero)]
 
 ###############################################################################
+def calculate_vcf(snp):
+    # Get alleles from the VCF format
+    allele1, allele2 = snp[0], snp[1]
+    snp = snp[6:]
+    
+    # Missing rate is simple to get
+    miss = snp.count('./.')/len(snp)
+    
+    # Case where every site is missing
+    if miss == 1:
+        return ['N', 'N', str(9), str(-9), str(9)]
+    # Case where the SNP is monomorphic
+    elif allele2 == '.':
+        return [allele1, 'N', str(9), str(-9), str(9)]
+    # Case where the SNP is triallelic or better
+    elif ',' in allele2:
+        return [allele1, allele2, str(9), str(-9), str(9)]
+    
+    # If we made it here, the SNP is biallelic
+    
+    count1 = 2*snp.count('0/0') + snp.count('0/1') + snp.count('1/0')
+    count2 = 2*snp.count('1/1') + snp.count('0/1') + snp.count('1/0')
+    hetero = (snp.count('0/1') + snp.count('1/0'))/(len(snp) - snp.count('./.'))
+    
+    if count1 >= count2:
+        maf = count2/(count1 + count2)
+        return [allele1, allele2, str(miss), str(maf), str(hetero)]
+    else:
+        maf = count1/(count1 + count2)
+        return [allele2, allele1, str(miss), str(maf), str(hetero)]
+
+###############################################################################
 def dsfStat(filename):
     print("Calculating statistics.")
     stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf", "het"]]
@@ -144,6 +179,28 @@ def hmpStat(filename):
             line = line.strip().split('\t')
             substat = [line[0], line[2], line[3]]
             substat.extend(calculate(line[11:]))
+            stats.append(substat)
+            
+            counter += 1
+            if counter % 1e5 == 0:
+                print("Processed [ ", str(counter), " ] SNPs.")
+    
+    return stats
+
+###############################################################################
+def vcfStat(filename):
+    print("Calculating statistics.")
+    stats = [["snpid", "chr", "pos", "major", "minor", "miss", "maf", "het"]]
+    counter = 0
+    
+    with open(filename, 'r') as infile:
+        for line in infile:
+            # Skip header lines
+            if line[0] == "#": continue
+            
+            line = line.strip().split('\t')
+            substat = [line[2], line[0], line[1]]
+            substat.extend(calculate_vcf(line[3:]))
             stats.append(substat)
             
             counter += 1
@@ -211,6 +268,8 @@ if __name__ == '__main__':
         stats = hmpStat(args['input'])
     elif args['modei'] == 3:
         stats = pedStat(args['input'])
+    elif args['modei'] == 4:
+        stats = vcfStat(args['input'])
     else:
         warning("Unrecognized input mode.")
         
