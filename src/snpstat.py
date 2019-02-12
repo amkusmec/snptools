@@ -117,6 +117,9 @@ def calculate_vcf(snp):
     allele1, allele2 = snp[0], snp[1]
     snp = snp[6:]
     
+    # Remove optional information
+    snp = [x.split(':')[0] for x in snp]
+    
     # Missing rate is simple to get
     miss = snp.count('./.')/len(snp)
     
