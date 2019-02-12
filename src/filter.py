@@ -104,12 +104,13 @@ def filterDsf(inname, outname, stats, miss, maf, het):
         
         counter += 1
         if counter % 1e5 == 0:
-            print("Processed [ ", str(counter), " ] SNPs.")
+            print("Processed [ ", str(counter), " ] SNPs.", end = '\r')
 
     infile.close()
     keepfile.close()
     filtfile.close()
-
+    
+    print()
     print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".dsf", " ].")
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.dsf", " ].")
 
@@ -149,12 +150,13 @@ def filterHmp(inname, outname, stats, miss, maf, het, retain):
         
         counter += 1
         if counter % 1e5 == 0:
-            print("Processed [ ", str(counter), " ] SNPs.")
+            print("Processed [ ", str(counter), " ] SNPs.", end = '\r')
 
     infile.close()
     keepfile.close()
     filtfile.close()
-
+    
+    print()
     print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".hmp.txt", " ].")
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.hmp.txt", " ].")
 
@@ -204,9 +206,10 @@ def filterPed(inname, outname, stats, miss, maf, het):
 
         counter += 1
         if counter % 1e5 == 0:
-            print("Processed [ ", str(counter), " ] SNPs.")
+            print("Processed [ ", str(counter), " ] SNPs.", end = '\r')
 
     # Report the results and write the output
+    print()
     print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".ped", " ].")
     ksnps = zip(*ksnps)
     with open(outname + ".ped", 'w') as outfile:
@@ -246,10 +249,10 @@ def filterVcf(inname, outname, stats, miss, maf, het):
         
         # Filter or keep
         snp = snp.split()
-        if snp[0] not in stats:
-            warning(snp[0] + " is not present in .stat file.")
+        if snp[2] not in stats:
+            warning(snp[2] + " is not present in .stat file.")
         
-        if stats[snp[0]][0] <= miss and stats[snp[0]][1] >= maf and stats[snp[0]][2] <= het:
+        if stats[snp[2]][0] <= miss and stats[snp[2]][1] >= maf and stats[snp[2]][2] <= het:
             keepfile.write('\t'.join(snp) + '\n')
             kept += 1
         else:
@@ -258,12 +261,13 @@ def filterVcf(inname, outname, stats, miss, maf, het):
         
         counter += 1
         if counter % 1e5 == 0:
-            print("Processed [ ", str(counter), " ] SNPs.")
+            print("Processed [ ", str(counter), " ] SNPs.", end = '\r')
     
     infile.close()
     keepfile.close()
     filtfile.close()
     
+    print()
     print("Kept [ ", str(kept), " ] SNPs in [ ", outname + ".vcf", " ].")
     print("Removed [ ", str(filt), " ] SNPs to [ ", outname + "_filtered.vcf", " ].")
 
