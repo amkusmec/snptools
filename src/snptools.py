@@ -45,6 +45,8 @@ def checkFile(filename, modei):
             line = infile.readline().split()
             if len(line) != 4:
                 warning("Map file formatted incorrectly.")
+    elif modei == 4:
+        print("NB: No format checking for VCF files.")
     else:
         warning("Unrecognized input mode " + str(modei) + ".")
     
