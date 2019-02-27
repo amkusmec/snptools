@@ -120,6 +120,9 @@ def calculate_vcf(snp):
     # Remove optional information
     snp = [x.split(':')[0] for x in snp]
     
+    # Remove phase information
+    snp = [x.replace('|', '/') for x in snp]
+    
     # Missing rate is simple to get
     miss = snp.count('./.')/len(snp)
     
@@ -208,7 +211,7 @@ def vcfStat(filename):
             
             counter += 1
             if counter % 1e5 == 0:
-                print("Processed [ ", str(counter), " ] SNPs.")
+                print("Processed [", str(counter), "] SNPs.", end = "\r")
     
     return stats
 
@@ -241,7 +244,7 @@ def pedStat(filename):
         
         counter += 1
         if counter % 1e5 == 0:
-            print("Processed [ ", str(counter), " ] SNPs.")
+            print("Processed [ ", str(counter), " ] SNPs.", end = "\r")
     
     return stats
 
